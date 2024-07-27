@@ -1,7 +1,50 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import axios from '../components/axiosConfig';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 function Signin() {
+  const navigate = useNavigate();
+  const [Fomdata, setFormdata] = useState({
+    email: "",
+    password: ""
+  });
+
+  const handleForm = (e) => {
+    setFormdata({
+      ...Fomdata,
+      [e.target.name]: e.target.value
+    });
+  }
+
+  const submitform = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await axios.post('/users/signin', Fomdata, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (res.data.success) {
+        console.log("hii i am in success");
+        console.log(res.data);
+         navigate("/home");
+        toast.success(res?.data?.message);
+        setFormdata({
+          email: "",
+          password: ""
+        });
+      } else {
+        console.log("hii i am in else");
+        toast.error(res.data.message);
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(error.response?.data?.message || "An error occurred during sign-in");
+    }
+  }
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100">
       <div className="flex flex-col bg-white shadow-md px-6 py-8 rounded-3xl w-full max-w-md">
@@ -13,7 +56,7 @@ function Signin() {
         </div>
 
         <div className="mt-10">
-          <form action="#">
+          <form onSubmit={submitform}>
             <div className="flex flex-col mb-5">
               <label htmlFor="email" className="mb-1 text-xs tracking-wide text-gray-600">
                 E-Mail Address:
@@ -26,6 +69,8 @@ function Signin() {
                   id="email"
                   type="email"
                   name="email"
+                  value={Fomdata.email}
+                  onChange={handleForm}
                   className="text-sm placeholder-gray-500 pl-10 pr-4 rounded-2xl border border-gray-400 w-full py-2 focus:outline-none focus:border-blue-400"
                   placeholder="Enter your email"
                 />
@@ -43,6 +88,8 @@ function Signin() {
                   id="password"
                   type="password"
                   name="password"
+                  value={Fomdata.password}
+                  onChange={handleForm}
                   className="text-sm placeholder-gray-500 pl-10 pr-4 rounded-2xl border border-gray-400 w-full py-2 focus:outline-none focus:border-blue-400"
                   placeholder="Enter your password"
                 />
