@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
+import axios from '../components/axiosConfig';
+import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
 
 function CreatePost() {
+  const navigate=useNavigate()
   const [message, setMessage] = useState('');
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState('');
@@ -26,14 +30,36 @@ function CreatePost() {
     e.preventDefault();
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async(e) => {
     e.preventDefault();
-    // Handle form submission logic here (e.g., API call to save the post)
-    console.log('Post created:', { message, image });
-    // Reset fields after submission
-    setMessage('');
-    setImage(null);
-    setImagePreview('');
+
+    const formData = new FormData();
+    formData.append('message', message);
+    if (image) {
+      formData.append('profileImage', image);
+    }
+
+    try {
+      const res = await axios.post('/post/create-post', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+
+      if (res.data.success) {
+       // console.log('Post created:', res.data);
+        toast.success('Post created successfully!');
+        navigate('/')
+
+        // Reset fields after submission
+        setMessage('');
+        setImage(null);
+        setImagePreview('');
+      }
+    } catch (error) {
+      console.error('Error creating post:', error);
+      toast.error('Error creating post.');
+    }
   };
 
   return (
@@ -43,8 +69,8 @@ function CreatePost() {
         onSubmit={handleSubmit}
         onDragOver={handleDragOver}
         onDrop={handleDrop}
-      > 
-       {imagePreview && (
+      >
+        {imagePreview && (
           <div className="mt-4 mb-4">
             <img src={imagePreview} alt="Preview" className="w-full h-48 object-cover rounded-lg border-2 border-blue-200 shadow-md" />
           </div>
@@ -88,7 +114,6 @@ function CreatePost() {
             </svg>
           </button>
         </footer>
-       
       </form>
     </div>
   );

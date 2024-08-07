@@ -2,45 +2,54 @@ import axios from '../components/axiosConfig';
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { useRecoilState } from 'recoil';
+import { userState } from '../store/atoms/user';
 
 function Signin() {
   const navigate = useNavigate();
-  const [Fomdata, setFormdata] = useState({
+  const [formData, setFormData] = useState({
     email: "",
     password: ""
   });
 
+  const [user, setUser] = useRecoilState(userState);
+
   const handleForm = (e) => {
-    setFormdata({
-      ...Fomdata,
+    setFormData({
+      ...formData,
       [e.target.name]: e.target.value
     });
   }
 
-  const submitform = async (e) => {
+  const submitForm = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post('/users/signin', Fomdata, {
+      const res = await axios.post('/users/signin', formData, {
         headers: {
           'Content-Type': 'application/json'
         }
       });
 
       if (res.data.success) {
-        console.log("hii i am in success");
-        console.log(res.data);
-         navigate("/home");
+        localStorage.setItem('token', res.data.token);
+        localStorage.setItem('userEmail', formData.email);
+
+        setUser({
+          isLogin: true,
+          userEmail: formData.email,
+          token: res.data.token,
+        });
+
+        navigate("/");
         toast.success(res?.data?.message);
-        setFormdata({
+        setFormData({
           email: "",
           password: ""
         });
       } else {
-        console.log("hii i am in else");
         toast.error(res.data.message);
       }
     } catch (error) {
-      console.log(error);
       toast.error(error.response?.data?.message || "An error occurred during sign-in");
     }
   }
@@ -52,26 +61,23 @@ function Signin() {
           Sign-In
         </div>
         <div className="mt-4 self-center text-sm sm:text-md text-gray-800">
-          Enter your credentials to get access account
+          Enter your credentials to get access to your account
         </div>
 
         <div className="mt-10">
-          <form onSubmit={submitform}>
+          <form onSubmit={submitForm}>
             <div className="flex flex-col mb-5">
               <label htmlFor="email" className="mb-1 text-xs tracking-wide text-gray-600">
                 E-Mail Address:
               </label>
               <div className="relative">
-                <div className="inline-flex items-center justify-center absolute left-0 top-0 h-full w-10 text-gray-400">
-                  <i className="fas fa-at text-blue-500"></i>
-                </div>
                 <input
                   id="email"
                   type="email"
                   name="email"
-                  value={Fomdata.email}
+                  value={formData.email}
                   onChange={handleForm}
-                  className="text-sm placeholder-gray-500 pl-10 pr-4 rounded-2xl border border-gray-400 w-full py-2 focus:outline-none focus:border-blue-400"
+                  className="text-sm placeholder-gray-500 pl-4 rounded-2xl border border-gray-400 w-full py-2 focus:outline-none focus:border-blue-400"
                   placeholder="Enter your email"
                 />
               </div>
@@ -81,16 +87,13 @@ function Signin() {
                 Password:
               </label>
               <div className="relative">
-                <div className="inline-flex items-center justify-center absolute left-0 top-0 h-full w-10 text-gray-400">
-                  <i className="fas fa-lock text-blue-500"></i>
-                </div>
                 <input
                   id="password"
                   type="password"
                   name="password"
-                  value={Fomdata.password}
+                  value={formData.password}
                   onChange={handleForm}
-                  className="text-sm placeholder-gray-500 pl-10 pr-4 rounded-2xl border border-gray-400 w-full py-2 focus:outline-none focus:border-blue-400"
+                  className="text-sm placeholder-gray-500 pl-4 rounded-2xl border border-gray-400 w-full py-2 focus:outline-none focus:border-blue-400"
                   placeholder="Enter your password"
                 />
               </div>
@@ -102,19 +105,6 @@ function Signin() {
                 className="flex mt-2 items-center justify-center focus:outline-none text-white text-sm sm:text-base bg-blue-500 hover:bg-blue-600 rounded-2xl py-2 w-full transition duration-150 ease-in"
               >
                 <span className="mr-2 uppercase">Sign-In</span>
-                <span>
-                  <svg
-                    className="h-6 w-6"
-                    fill="none"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path d="M13 9l3 3m0 0l-3 3m3-3H8m13 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </span>
               </button>
             </div>
           </form>
@@ -122,7 +112,7 @@ function Signin() {
       </div>
       <div className="flex justify-center items-center mt-6">
         <Link
-          to="/signup" // Set the path you want to navigate to
+          to="/signup"
           className="inline-flex items-center text-gray-700 font-medium text-xs text-center"
         >
           <span className="ml-2">

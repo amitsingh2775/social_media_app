@@ -51,7 +51,7 @@ function Profile() {
         {/* Gallery */}
         <div className="lg:w-3/4 ">
         <div>
-        <h3 className="text-xl font-bold text-gray-900">Posts</h3>
+        <h3 className="text-xl font-bold text-blue-900">Posts</h3>
         </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             <img

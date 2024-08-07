@@ -1,6 +1,27 @@
-import React from 'react';
+import React,{useEffect} from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useRecoilValue } from 'recoil';
+import { userLogin } from '../store/selectors/isLogin';
+
+// const getToken=()=>{
+//   const token = localStorage.getItem('token');
+//   return token;
+// }
 
 function Home() {
+
+   const navigate=useNavigate()
+   const isLogin=useRecoilValue(userLogin)
+
+  useEffect(()=>{
+    // const token=getToken();
+    // if(!token){
+    //  navigate('/signin')
+    // }
+      if(!isLogin){
+        navigate('/signin')
+      }
+  },[])
   return (
     <div className="min-h-screen flex justify-center items-center bg-gray-100">
       {/* Card */}
